@@ -1,0 +1,324 @@
+<title>90 Day Quest</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap">
+<style>
+/* Layout: a single-column handheld "game screen" — status card, today's quests, lore scroll, 90-day map, codex. Deliberately single-theme (night dungeon). */
+:root{
+  --night:#13142a; --panel:#1e2044; --panel2:#2a2d5c; --line:#3c4080;
+  --gold:#f2c14e; --xp:#6fd36a; --ember:#ff7a45; --ice:#7fc8ff;
+  --text:#ecebff; --muted:#a3a3cf;
+  --parch:#ecdcb2; --ink:#2b1d10; --parch-line:#b89a5f;
+  --display:"Press Start 2P", ui-monospace, monospace;
+  --body:"Pixelify Sans", ui-rounded, system-ui, sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--night);color:var(--text)}
+body{font-family:var(--body);font-size:17px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px;
+  background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:24px 24px}
+.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1,h2,h3,.label{font-family:var(--display);font-weight:400;letter-spacing:.04em;text-wrap:balance}
+h1{font-size:18px;margin:0;color:var(--gold)}
+h2{font-size:11px;margin:0;color:var(--muted);text-transform:uppercase}
+.px{image-rendering:pixelated;display:block}
+.box{background:var(--panel);border:3px solid var(--line);box-shadow:4px 4px 0 #0008;padding:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.demo{font-family:var(--display);font-size:8px;color:var(--night);background:var(--ice);padding:5px 6px}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn{font-family:var(--display);font-size:10px;background:var(--gold);color:var(--night);border:0;padding:12px 14px;box-shadow:0 4px 0 #8a6a1c;letter-spacing:.04em}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6a1c}
+.btn.ghost{background:var(--panel2);color:var(--text);box-shadow:0 4px 0 #0009}
+/* hero card */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
+.hero .name{font-family:var(--display);font-size:12px}
+.hero .sub{color:var(--muted);font-size:15px}
+.bar{height:16px;background:var(--night);border:2px solid var(--line);position:relative;margin-top:6px}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--xp);transition:width .4s steps(8)}
+.bar span{position:absolute;right:4px;top:-1px;font-size:12px;font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:16px;margin-top:8px;font-size:15px;flex-wrap:wrap}
+.stats b{font-family:var(--display);font-size:10px;font-weight:400}
+.ember{color:var(--ember)} .ice{color:var(--ice)}
+/* quests */
+.quests{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.q{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--panel2);border:2px solid var(--line);padding:10px;text-align:left;width:100%}
+.q .chk{width:24px;height:24px;border:3px solid var(--muted);display:grid;place-items:center;font-family:var(--display);font-size:10px}
+.q.done{opacity:.7}.q.done .chk{background:var(--xp);border-color:var(--xp);color:var(--night)}
+.q.done .t{text-decoration:line-through}
+.q .xp{font-family:var(--display);font-size:9px;color:var(--gold)}
+.rate{display:flex;gap:6px;margin-top:6px}
+.rate button{width:34px;height:30px;background:var(--night);border:2px solid var(--line);font-family:var(--display);font-size:10px}
+.rate button.on{background:var(--gold);color:var(--night);border-color:var(--gold)}
+/* lore scroll */
+.scroll{background:var(--parch);color:var(--ink);border:3px solid var(--parch-line);box-shadow:4px 4px 0 #0008;padding:16px;position:relative}
+.scroll h3{font-size:11px;margin:0 0 10px;color:#6b3d12;line-height:1.6}
+.scroll p{margin:0 0 10px;max-width:62ch}
+.scroll .src{font-size:13px;color:#5d4a2e;border-top:2px dashed var(--parch-line);padding-top:8px}
+.scroll .src a{color:#6b3d12}
+.pip{display:flex;gap:10px;align-items:flex-start}
+.new{font-family:var(--display);font-size:8px;background:var(--ember);color:#fff;padding:4px 5px;position:absolute;top:-10px;right:10px}
+/* map */
+.map{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;margin-top:10px}
+.map i{aspect-ratio:1;background:var(--night);border:1px solid var(--line)}
+.map i.d{background:var(--xp);border-color:var(--xp)}
+.map i.m{background:var(--panel2)}
+.map i.s{background:var(--ice);border-color:var(--ice)}
+.map i.now{outline:2px solid var(--gold);outline-offset:1px}
+.map i.ms{border-color:var(--gold)}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:5px;background:var(--c);vertical-align:-1px}
+.phases{display:flex;justify-content:space-between;font-family:var(--display);font-size:8px;color:var(--muted);margin-top:8px;gap:6px}
+/* codex */
+details{border-top:2px solid var(--line);padding:8px 0}
+details:first-of-type{border-top:0}
+summary{cursor:pointer;font-size:16px}
+summary small{color:var(--muted);font-family:var(--display);font-size:8px;margin-right:6px}
+details p{margin:8px 0;color:var(--text);max-width:62ch}
+details .cite{font-size:13px;color:var(--muted)}
+details a{color:var(--ice)}
+/* setup */
+.goals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.goal{background:var(--panel2);border:3px solid var(--line);padding:12px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:96px}
+.goal.on{border-color:var(--gold)}
+.goal b{font-family:var(--display);font-size:10px;font-weight:400;line-height:1.5}
+.goal small{color:var(--muted);font-size:14px}
+.goal[disabled]{opacity:.45;cursor:not-allowed}
+label{display:block;font-size:15px;color:var(--muted);margin:12px 0 4px}
+input[type=text]{width:100%;font:inherit;background:var(--night);color:var(--text);border:2px solid var(--line);padding:10px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.tester{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--gold);color:var(--night);font-family:var(--display);font-size:10px;padding:12px 14px;box-shadow:4px 4px 0 #0008;max-width:calc(100% - 32px);text-align:center;line-height:1.6}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+.bob{animation:bob 1.6s steps(2) infinite}
+</style>
+
+<div class="wrap" id="app"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// ---------- research library (verified 2026-10-27; see research/sources.json) ----------
+const SRC={
+ lally:{c:"Lally, van Jaarsveld, Potts & Wardle (2010). European Journal of Social Psychology, 40, 998–1009.",u:"https://doi.org/10.1002/ejsp.674"},
+ goll:{c:"Gollwitzer & Sheeran (2006). Advances in Experimental Social Psychology, 38, 69–119.",u:"https://doi.org/10.1016/S0065-2601(06)38002-1"},
+ harkin:{c:"Harkin et al. (2016). Psychological Bulletin, 142(2), 198–229.",u:"https://doi.org/10.1037/bul0000025"},
+ wood:{c:"Wood & Rünger (2016). Annual Review of Psychology, 67.",u:"https://doi.org/10.1146/annurev-psych-122414-033417"},
+ dai:{c:"Dai, Milkman & Riis (2014). Management Science.",u:"https://doi.org/10.1287/mnsc.2014.1901"},
+ kivetz:{c:"Kivetz, Urminsky & Zheng (2006). Journal of Marketing Research, 43, 39–58.",u:"https://business.columbia.edu/sites/default/files-efs/pubfiles/1200/goalgradient.pdf"},
+ who:{c:"Bull et al. (2020). WHO guidelines on physical activity. British Journal of Sports Medicine, 54, 1451–1462.",u:"https://doi.org/10.1136/bjsports-2020-102955"},
+ paluch:{c:"Paluch et al. (2022). Lancet Public Health, 7, e219–28.",u:"https://discovery.ucl.ac.uk/id/eprint/10170017/1/1-s2.0-S2468266721003029-main.pdf"},
+ burke:{c:"Burke, Wang & Sevick (2011). Journal of the American Dietetic Association, 111(1), 92–102.",u:"https://pubmed.ncbi.nlm.nih.gov/21185970/"},
+ morton:{c:"Morton et al. (2018). British Journal of Sports Medicine, 52(6), 376–384.",u:"https://bjsm.bmj.com/content/52/6/376"},
+ watson:{c:"Watson et al. (2015). Journal of Clinical Sleep Medicine, 11(6), 591–592.",u:"https://doi.org/10.5664/jcsm.4758"}
+};
+const SHARED=[
+ {d:2,g:"habit",t:"Your if-then plan is a cheat code",s:"goll",p:["That “After I ___, I will ___” line you wrote has a name: an implementation intention.","A 2006 meta-analysis pooled 94 tests and found if-then plans gave goal pursuit a medium-to-large boost (d = 0.65). You made the decision ahead of time, so future-you doesn't have to."]},
+ {d:3,g:"habit",t:"Cues do the heavy lifting",s:"wood",p:["Habits are triggered by context: a place, a time, or the action right before.","Once a habit forms, seeing the cue calls up the behavior automatically. That's why your quest hooks onto something you already do."]},
+ {d:5,t:"Why you check things off",s:"harkin",p:["A 2016 review of 138 experiments, with nearly 20,000 people, found that tracking progress helped people reach their goals.","The effect was bigger when progress was physically recorded, like tapping that checkbox."]},
+ {d:7,t:"Missed a day? You're fine",s:"lally",p:["In the UCL habit study, missing one chance to do the behavior didn't meaningfully set back habit building.","That's why you get one Streak Shield per week. It's the long gaps that hurt."]},
+ {d:10,t:"About that head start",s:"kivetz",p:["Your XP bar didn't start at zero. That's on purpose.","In a coffee-card experiment, people with a 12-stamp card and 2 free stamps finished faster than people with a plain 10-stamp card, even though both needed 10 purchases. Visible progress pulls you forward."]},
+ {d:14,t:"Why rewards matter",s:"wood",p:["Habits form when a rewarded action is repeated in the same context. The reward helps lock in the link between cue and action.","Small, quick wins count. That's what the XP is for."]},
+ {d:31,t:"Phase 2: a fresh start",s:"dai",p:["New chapters make people act on goals. In one study, the odds of a gym visit rose about 33% at the start of a week and 47% at the start of a semester.","Phase 2 is your new chapter. Use it."]},
+ {d:45,t:"The curve is bending",s:"lally",p:["In habit-formation data, automaticity climbs fastest early and then levels off.","If today felt easier than Day 1, that's the curve at work."]},
+ {d:61,t:"Phase 3: the final stretch",s:"dai",p:["Another temporal landmark, another fresh start. The researchers saw goal-setting jump around new weeks, months, and years.","Thirty days left. Finish strong."]},
+ {d:66,t:"Day 66",s:"lally",p:["In the UCL study, the median time for a habit to reach its peak automaticity was 66 days.","The range was 18 to 254 days, so if it isn't automatic yet, you're still normal."]},
+ {d:90,t:"Quest complete",s:"lally",p:["You made it to Day 90, past the 66-day median from the UCL study.","Some habits there were still strengthening when the study ended, so keep the chain going."]}
+];
+const TRACK={
+ fitness:{
+  intro:{t:"Why 90 days, and why so small?",s:"who",p:["Welcome, adventurer. The World Health Organization recommends 150–300 minutes of moderate activity a week (or 75–150 vigorous), plus regular strength work.","The good news: some activity beats none, and more brings more benefit. So we start small and level up.","Your 90 days run in three phases. Habits in a real-world study took a median of 66 days to become automatic, so 90 gives you runway."]},
+  bites:[
+   {d:2,t:"Plan the when and where",s:"goll",p:["Decide now: “When it's ___ and I'm at ___, I'll walk.” Scientists call that an implementation intention.","A 2006 meta-analysis pooled 94 tests and found if-then plans gave goal pursuit a medium-to-large boost (d = 0.65)."]},
+   {d:3,t:"Same time, same place",s:"wood",p:["Habits are triggered by context: a place, a time, or the action right before.","Once a habit forms, the cue calls up the behavior automatically. Walking at the same time each day builds that cue."]},
+   {d:4,t:"How many steps actually matter?",s:"paluch",p:["A 2022 analysis of 15 studies and 47,471 adults found that risk of death kept falling with more daily steps, then leveled off around 8,000–10,000 for adults under 60 and 6,000–8,000 for 60+.","The most active group had about half the risk of the least active."]},
+   {d:6,t:"Writing it down works",s:"burke",p:["A review of 22 studies found a consistent link between self-monitoring (food, exercise, weight) and weight loss.","The authors noted the studies had limits, but the pattern held. A quick log is enough."]},
+   {d:9,t:"Sleep is a stat",s:"watson",p:["Sleep experts recommend adults get 7 or more hours a night, regularly.","Recovery happens here. Lights-out is a quest for a reason."]},
+   {d:12,t:"Protein, by the numbers",s:"morton",p:["A meta-analysis of 49 trials found protein supplements added modest muscle and strength gains on top of resistance training.","Gains leveled off around 1.6 g of protein per kg of body weight per day, with a wide margin of error. Check with a doctor or dietitian before big diet changes."]},
+   {d:18,t:"Strength is for everyone",s:"who",p:["The WHO recommends regular muscle-strengthening activity for every age group, not just athletes.","That's why bodyweight circuits show up in your plan."]}
+  ]},
+ habit:{
+  intro:{t:"Forget 21 days",s:"lally",p:["Welcome, adventurer. In a real-world UCL study, people picked one new daily behavior and tracked it for 12 weeks.","The median time to reach peak automaticity was 66 days, with a range of 18 to 254.","That's why your quest is 90 days: enough runway for most habits to lock in. We start tiny and grow it."]},
+  bites:[]}
+};
+function bitesFor(goal){return [...TRACK[goal].bites,...SHARED.filter(b=>!b.g||b.g===goal)].sort((a,b)=>a.d-b.d)}
+
+// ---------- quests (90-day plan) ----------
+function phase(d){return d<=30?1:d<=60?2:3}
+function questsFor(st,d){
+ const ph=phase(d),q=[];
+ if(st.goal==="fitness"){
+  const walk=Math.min(10+Math.floor((d-1)/7)*2,35);
+  q.push({id:"walk",t:`Walk ${walk} minutes`,xp:10});
+  if(d%7===2||d%7===5)q.push({id:"str",t:`Bodyweight circuit × ${ph}: squats, push-ups, glute bridges`,xp:15});
+  else q.push({id:"log",t:"Log what you ate today, one line per meal",xp:10});
+  q.push({id:"sleep",t:"Lights out on time: aim for 7+ hours",xp:10});
+ }else{
+  const act=ph===1?(st.tiny||st.habit):st.habit;
+  q.push({id:"do",t:`After I ${st.anchor}, I will ${act}`,xp:15});
+  q.push({id:"rate",t:"How automatic did it feel?",xp:5,rate:true});
+  if(d%7===0)q.push({id:"rev",t:"Weekly review: did your cue work? Adjust the time or place if not",xp:10});
+ }
+ return q;
+}
+
+// ---------- state ----------
+const KEY="levelup.v1";
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.goal)return s}catch(e){}return null}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function demo(){
+ const s={goal:"fitness",hero:"Wanderer",anchor:"",habit:"",tiny:"",day:12,xp:25,streak:0,shields:1,log:{},rates:{},seen:[],demo:true,screen:"home"};
+ for(let d=1;d<12;d++){
+  if(d===6){s.log[d]="missed-shield";continue}
+  const qs=questsFor(s,d);s.log[d]=qs.map(q=>q.id);
+  s.xp+=qs.reduce((a,q)=>a+q.xp,0)+20;
+ }
+ s.streak=10;s.shields=0;s.seen=bitesFor("fitness").filter(b=>b.d<12).map(b=>b.d);
+ return s;
+}
+let S=load()||demo();
+let draft={goal:"habit",hero:"",anchor:"",habit:"",tiny:""};
+
+function lvl(xp){let L=1,need=100;while(xp>=need){xp-=need;L++;need=100+(L-1)*50}return{L,cur:xp,need}}
+
+// ---------- pixel sprites ----------
+function sprite(rows,pal,px){
+ const w=rows[0].length,h=rows.length;let r="";
+ rows.forEach((row,y)=>[...row].forEach((c,x)=>{if(pal[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[c]}"/>`}));
+ return `<svg class="px" width="${w*px}" height="${h*px}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+}
+const HERO=["....hhhh....","...hhhhhh...","...hsssss...","...sesses...","....ssss....","..bbbbbbbb..",".sbbbbbbbbs.",".s.bbbbbb.s.","...bbggbb...","...pp..pp...","...pp..pp...","..kkk..kkk.."];
+const HERO_PAL={h:"#5a3a22",s:"#f1c27d",e:"#1b1b2f",b:"#3f7fd6",g:"#f2c14e",p:"#2c2f5a",k:"#6b4226"};
+const PIP=["...yy...","..yYYy..",".yYwwYy.",".YwkwkY.",".YwwwwY.","..YYYY..","...YY...","....Y..."];
+const PIP_PAL={y:"#c99a2e",Y:"#ffe08a",w:"#fff6d6",k:"#1b1b2f"};
+
+// ---------- render ----------
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const t=$("#toast");t.textContent=m;t.hidden=false;clearTimeout(toast.h);toast.h=setTimeout(()=>t.hidden=true,2600)}
+
+function render(){
+ const a=$("#app");
+ if(S.screen==="setup")return a.innerHTML=setupView();
+ if(S.screen==="intro")return a.innerHTML=introView();
+ a.innerHTML=homeView();
+}
+function scrollHTML(b,isNew){
+ return `<div class="scroll">${isNew?'<span class="new">NEW</span>':""}
+  <div class="pip"><div class="bob">${sprite(PIP,PIP_PAL,4)}</div><h3>${esc(b.t)}</h3></div>
+  ${b.p.map(x=>`<p>${esc(x)}</p>`).join("")}
+  <div class="src">Source: ${esc(SRC[b.s].c)} <a href="${SRC[b.s].u}" target="_blank" rel="noopener">Read it</a></div></div>`;
+}
+function homeView(){
+ const {L,cur,need}=lvl(S.xp),qs=questsFor(S,S.day),done=S.log[S.day]||[];
+ const all=bitesFor(S.goal),today=all.filter(b=>b.d<=S.day).pop();
+ const isNew=today&&!S.seen.includes(today.d);
+ const goalName=S.goal==="fitness"?"Fitness Quest":"New Habit Quest";
+ const ph=["","Spawn Zone","The Grind","Boss Zone"][phase(S.day)];
+ let cells="";for(let d=1;d<=90;d++){const l=S.log[d];let c="";
+  if(d<S.day)c=l==="missed-shield"?"s":(Array.isArray(l)&&l.length?"d":"m");
+  if(d===S.day)c+=" now";if([30,60,66,90].includes(d))c+=" ms";
+  cells+=`<i class="${c}" title="Day ${d}"></i>`}
+ const unlocked=all.filter(b=>b.d<=S.day);
+ return `
+ <div class="top"><h1>90 DAY QUEST</h1>${S.demo?'<span class="demo">DEMO RUN</span>':""}</div>
+ <section class="box hero">
+  <div class="bob">${sprite(HERO,HERO_PAL,6)}</div>
+  <div>
+   <div class="name">${esc(S.hero)} · LV ${L}</div>
+   <div class="sub">${goalName} · Day ${S.day}/90 · ${ph}</div>
+   <div class="bar" role="img" aria-label="XP ${cur} of ${need}"><i style="width:${Math.round(cur/need*100)}%"></i><span>${cur}/${need} XP</span></div>
+   <div class="stats"><span class="ember"><b>🔥 ${S.streak}</b> day streak</span><span class="ice"><b>◆ ${S.shields}</b> shield</span></div>
+  </div>
+ </section>
+ <section class="box">
+  <h2>Today's quests</h2>
+  <div class="quests">${qs.map(q=>{const on=done.includes(q.id);
+   if(q.rate){const v=S.rates[S.day];return `<div class="q ${on?"done":""}"><span class="chk">${on?"✓":""}</span><div><div class="t">${esc(q.t)}</div><div class="rate">${[1,2,3,4,5].map(n=>`<button aria-label="Rate ${n}" class="${v===n?"on":""}" onclick="rate(${n})">${n}</button>`).join("")}</div></div><span class="xp">+${q.xp}</span></div>`}
+   return `<button class="q ${on?"done":""}" onclick="tick('${q.id}')" aria-pressed="${on}"><span class="chk">${on?"✓":""}</span><span class="t">${esc(q.t)}</span><span class="xp">+${q.xp}</span></button>`}).join("")}</div>
+ </section>
+ ${today?`<section><h2 style="margin-bottom:8px">Pip's lore scroll · Day ${today.d}</h2>${scrollHTML(today,isNew)}</section>`:""}
+ <section class="box">
+  <h2>90-day map</h2>
+  <div class="map">${cells}</div>
+  <div class="phases"><span>1–30 SPAWN</span><span>31–60 GRIND</span><span>61–90 BOSS</span></div>
+  <div class="legend"><span style="--c:var(--xp)">Cleared</span><span style="--c:var(--ice)">Shield used</span><span style="--c:var(--panel2)">Missed</span><span style="--c:var(--gold)">Milestone</span></div>
+ </section>
+ <section class="box">
+  <h2>Codex · ${unlocked.length} of ${all.length+1} unlocked</h2>
+  <div style="margin-top:8px">
+   ${[{...TRACK[S.goal].intro,d:1},...unlocked].map(b=>`<details><summary><small>DAY ${b.d}</small>${esc(b.t)}</summary>${b.p.map(x=>`<p>${esc(x)}</p>`).join("")}<div class="cite">${esc(SRC[b.s].c)} <a href="${SRC[b.s].u}" target="_blank" rel="noopener">Source</a></div></details>`).join("")}
+  </div>
+ </section>
+ <section class="box">
+  <h2>Tester controls</h2>
+  <div class="row">
+   <button class="btn" onclick="nextDay()">Next day ▸</button>
+   <button class="btn ghost" onclick="startSetup()">${S.demo?"Start my own quest":"New quest"}</button>
+  </div>
+  <p class="tester" style="margin:10px 0 0">Preview only. “Next day” simulates time passing so you can see streaks, shields and new lore unlock.</p>
+ </section>`;
+}
+function setupView(){
+ const g=draft.goal;
+ const goals=[["fitness","Fitness","Move, eat, sleep"],["habit","New Habit","Stack it on a routine"],["debt","Pay Down Debt","Coming soon"],["save","Save Money","Coming soon"],["study","Study / Learn","Coming soon"]];
+ return `
+ <div class="top"><h1>NEW QUEST</h1></div>
+ <section class="box">
+  <h2>Choose your quest</h2>
+  <div class="goals">${goals.map(([id,n,s])=>`<button class="goal ${g===id?"on":""}" ${["fitness","habit"].includes(id)?`onclick="pick('${id}')"`:"disabled"}><b>${n}</b><small>${s}</small></button>`).join("")}</div>
+  <label for="hero">Hero name</label><input id="hero" type="text" maxlength="16" value="${esc(draft.hero)}" placeholder="e.g. Jon" oninput="draft.hero=this.value">
+  ${g==="habit"?`
+  <label for="anchor">After I…  (something you already do daily)</label><input id="anchor" type="text" maxlength="60" value="${esc(draft.anchor)}" placeholder="pour my morning coffee" oninput="draft.anchor=this.value">
+  <label for="habit">I will…  (the new habit)</label><input id="habit" type="text" maxlength="60" value="${esc(draft.habit)}" placeholder="read 10 pages" oninput="draft.habit=this.value">
+  <label for="tiny">Tiny version for Phase 1</label><input id="tiny" type="text" maxlength="60" value="${esc(draft.tiny)}" placeholder="read 1 page" oninput="draft.tiny=this.value">`:""}
+  <div class="row"><button class="btn" onclick="begin()">Begin Day 1 ▸</button>${S.goal&&!S.demo?'<button class="btn ghost" onclick="S.screen=\'home\';render()">Cancel</button>':'<button class="btn ghost" onclick="S.screen=\'home\';render()">Back to demo</button>'}</div>
+ </section>`;
+}
+function introView(){
+ const b=TRACK[S.goal].intro;
+ return `<div class="top"><h1>DAY 1</h1></div>${scrollHTML(b,false)}
+ <section class="box"><h2>Your head start</h2><p style="margin:8px 0 12px">You begin with 25 XP already in the bar. Pip will explain why on Day 10.</p><button class="btn" onclick="S.screen='home';save();render()">Accept quest ▸</button></section>`;
+}
+
+// ---------- actions ----------
+function award(before){const a=lvl(before).L,b=lvl(S.xp).L;if(b>a)toast(`LEVEL UP! You're now LV ${b}`)}
+function checkAll(){
+ const qs=questsFor(S,S.day),done=S.log[S.day]||[];
+ if(qs.every(q=>done.includes(q.id))&&!S.bonus?.[S.day]){S.bonus=S.bonus||{};S.bonus[S.day]=1;const b=S.xp;S.xp+=20;toast("All quests cleared! +20 bonus XP");award(b)}
+}
+function tick(id){
+ const done=S.log[S.day]=Array.isArray(S.log[S.day])?S.log[S.day]:[];
+ const q=questsFor(S,S.day).find(x=>x.id===id),before=S.xp,i=done.indexOf(id);
+ if(i>=0){done.splice(i,1);S.xp-=q.xp}else{done.push(id);S.xp+=q.xp;award(before)}
+ checkAll();save();render();
+}
+function rate(n){
+ const done=S.log[S.day]=Array.isArray(S.log[S.day])?S.log[S.day]:[];
+ S.rates[S.day]=n;if(!done.includes("rate")){done.push("rate");const b=S.xp;S.xp+=5;award(b)}
+ checkAll();save();render();
+}
+function nextDay(){
+ const all=bitesFor(S.goal),today=all.filter(b=>b.d<=S.day).pop();
+ if(today&&!S.seen.includes(today.d))S.seen.push(today.d);
+ const qs=questsFor(S,S.day),done=S.log[S.day]||[];
+ const full=qs.every(q=>done.includes(q.id));
+ if(full){S.streak++}
+ else if(S.shields>0&&S.log[S.day-1]!=="missed-shield"){S.shields--;S.log[S.day]="missed-shield";toast("Streak Shield used. One miss won't break a habit.")}
+ else{S.streak=0;toast("Streak reset. Pick it back up today.")}
+ if(S.day>=90){toast("Quest complete!");save();return render()}
+ S.day++;
+ if(S.day%7===1)S.shields=Math.min(S.shields+1,1);
+ const nb=all.find(b=>b.d===S.day);if(nb)setTimeout(()=>toast("New lore unlocked!"),S.streak?0:2700);
+ save();render();window.scrollTo({top:0,behavior:"smooth"});
+}
+function startSetup(){draft={goal:"habit",hero:"",anchor:"",habit:"",tiny:""};S.screen="setup";render()}
+function pick(g){draft.goal=g;render()}
+function begin(){
+ if(!draft.hero.trim())return toast("Name your hero first");
+ if(draft.goal==="habit"&&(!draft.anchor.trim()||!draft.habit.trim()))return toast("Fill in “After I…” and “I will…”");
+ S={goal:draft.goal,hero:draft.hero.trim(),anchor:draft.anchor.trim(),habit:draft.habit.trim(),tiny:draft.tiny.trim(),day:1,xp:25,streak:0,shields:1,log:{},rates:{},seen:[],screen:"intro"};
+ save();render();window.scrollTo(0,0);
+}
+render();
+</script>
