@@ -1,27 +1,37 @@
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { TRACKS } from '../content';
-import { achievementsFor, completedToday, coreWhy, currentLore, GameState, phase, PHASE_NAMES, questsFor, TOTAL_DAYS } from '../game';
+import { formatTime } from '../device';
+import {
+  achievementsFor, completedToday, coreWhy, cueLine, currentLore, dayDoneToday, days, daysDone, GameState, minimumAvailable,
+  minimumFor, minimumToday, phase, PHASE_NAMES, questsFor, TOTAL_DAYS,
+} from '../game';
 import { HEROES, PIP, PIP_PAL, Sprite } from '../Sprite';
 import { C, F } from '../theme';
+
+export type SheetName = 'journey' | 'achievements' | 'why' | 'reminder';
 
 type Props = {
   s: GameState;
   onToggle: (id: string) => void;
+  onMinimum: () => void;
   onRate: (n: number) => void;
   onOpenTip: () => void;
-  onOpen: (sheet: 'journey' | 'achievements' | 'why') => void;
+  onOpen: (sheet: SheetName) => void;
+  onDismissWelcome: () => void;
   onNextDay: () => void;
   onNewQuest: () => void;
 };
 
-export function Home({ s, onToggle, onRate, onOpenTip, onOpen, onNextDay, onNewQuest }: Props) {
+export function Home({ s, onToggle, onMinimum, onRate, onOpenTip, onOpen, onDismissWelcome, onNextDay, onNewQuest }: Props) {
   const quests = questsFor(s, s.day);
   const done = completedToday(s);
   const lore = currentLore(s) ?? TRACKS[s.goal].intro;
   const tipNew = lore.day > 1 && !s.seenLore.includes(lore.day);
   const earned = achievementsFor(s.goal).filter(a => s.achievements[a.id]).length;
-  const total = achievementsFor(s.goal).length;
   const hero = HEROES[s.character];
+  const total = daysDone(s);
+  const minOn = minimumToday(s);
+  const dayDone = dayDoneToday(s);
 
   return (
     <View style={st.page}>
@@ -32,21 +42,28 @@ export function Home({ s, onToggle, onRate, onOpenTip, onOpen, onNextDay, onNewQ
             <Text style={st.name} numberOfLines={1}>{s.hero}</Text>
             {s.demo && <Text style={st.demo}>DEMO</Text>}
           </View>
-          <Text style={st.day}>{s.finished ? 'Quest complete' : `Day ${s.day} of ${TOTAL_DAYS}`} · {PHASE_NAMES[phase(s.day)]}</Text>
-          <View style={st.progress} accessibilityLabel={`${s.day} of ${TOTAL_DAYS} days`}>
-            <View style={[st.progressFill, { width: `${Math.round((s.day / TOTAL_DAYS) * 100)}%` }]} />
+          <Text style={st.done}>{days(total)} done</Text>
+          <View style={st.progress} accessibilityLabel={`${total} of ${TOTAL_DAYS} days done`}>
+            <View style={[st.progressFill, { width: `${Math.round((total / TOTAL_DAYS) * 100)}%` }]} />
           </View>
+          <Text style={st.day}>{s.finished ? 'Quest complete' : `Day ${s.day} of ${TOTAL_DAYS}`} · {PHASE_NAMES[phase(s.day)]}</Text>
           <View style={st.stats}>
-            <Text style={[st.stat, { color: C.streak }]}>🔥 {s.streak}</Text>
-            <Text style={[st.stat, { color: C.shield }]}>🛡 {s.shields}</Text>
-            <Pressable accessibilityRole="button" accessibilityLabel={`Achievements, ${earned} of ${total}`} onPress={() => onOpen('achievements')} hitSlop={8}>
-              <Text style={[st.stat, { color: C.text }]}>🏆 {earned}/{total}</Text>
+            <Text style={[st.stat, { color: C.streak }]} accessibilityLabel={`${s.streak} day streak`}>🔥 {s.streak}</Text>
+            <Text style={[st.stat, { color: C.shield }]} accessibilityLabel={`${s.shields} Streak Shield`}>🛡 {s.shields}</Text>
+            <Pressable accessibilityRole="button" accessibilityLabel={s.reminder ? `Reminder at ${formatTime(s.reminder)}` : 'Set a reminder'} onPress={() => onOpen('reminder')} hitSlop={8}>
+              <Text style={[st.stat, { color: C.muted }]}>🔔 {s.reminder ? formatTime(s.reminder) : 'Off'}</Text>
             </Pressable>
           </View>
         </View>
       </View>
 
-      {!!coreWhy(s) && (
+      {s.welcomeBack ? (
+        <View style={st.welcome}>
+          <Text style={st.welcomeTitle}>Welcome back, {s.hero}.</Text>
+          <Text style={st.welcomeText}>{total > 0 ? `Your ${days(total)} still count. ` : ''}Missing days is normal. Start small today: even the minimum keeps the habit alive.</Text>
+          <Pressable accessibilityRole="button" onPress={onDismissWelcome} hitSlop={8}><Text style={st.link}>Got it</Text></Pressable>
+        </View>
+      ) : !!coreWhy(s) && (
         <Pressable accessibilityRole="button" accessibilityHint="Shows all 7 levels of your why" onPress={() => onOpen('why')} style={st.why}>
           <Text style={st.whyLabel}>MY WHY</Text>
           <Text style={st.whyText} numberOfLines={2}>{coreWhy(s)}</Text>
@@ -67,7 +84,7 @@ export function Home({ s, onToggle, onRate, onOpenTip, onOpen, onNextDay, onNewQ
       </Pressable>
 
       <View style={st.list}>
-        <Text style={st.listLabel}>TODAY</Text>
+        <Text style={st.cue} numberOfLines={2}>{cueLine(s)}</Text>
         {quests.map(q => {
           const on = done.includes(q.id);
           if (q.rating) {
@@ -94,16 +111,23 @@ export function Home({ s, onToggle, onRate, onOpenTip, onOpen, onNextDay, onNewQ
             </Pressable>
           );
         })}
+        {minimumAvailable(s) && (!dayDone || minOn) && (
+          <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: minOn }} accessibilityHint="A short version that still counts as a day done"
+            onPress={onMinimum} style={[st.minimum, minOn && st.minimumOn]}>
+            <View style={[st.check, st.checkSmall, minOn && st.checkKept]}>{minOn && <Text style={st.checkMark}>✓</Text>}</View>
+            <Text style={st.minimumText}><Text style={{ fontFamily: F.bold }}>Short on time?</Text> Minimum day: {minimumFor(s).toLowerCase()}</Text>
+          </Pressable>
+        )}
       </View>
 
       <View style={st.nav}>
         <NavBtn label="Journey" sub="Map & lessons" onPress={() => onOpen('journey')} />
-        <NavBtn label="Achievements" sub={`${earned} of ${total}`} onPress={() => onOpen('achievements')} />
+        <NavBtn label="Achievements" sub={`${earned} earned`} onPress={() => onOpen('achievements')} />
       </View>
       <View style={st.tester}>
         <Text style={st.testerLabel}>Tester:</Text>
-        <Pressable accessibilityRole="button" onPress={onNextDay} hitSlop={8}><Text style={st.testerLink}>Next day ›</Text></Pressable>
-        <Pressable accessibilityRole="button" onPress={onNewQuest} hitSlop={8}><Text style={st.testerLink}>{s.demo ? 'Start my own quest' : 'New quest'}</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={onNextDay} hitSlop={8}><Text style={st.link}>Next day ›</Text></Pressable>
+        <Pressable accessibilityRole="button" onPress={onNewQuest} hitSlop={8}><Text style={st.link}>{s.demo ? 'Start my own quest' : 'New quest'}</Text></Pressable>
       </View>
     </View>
   );
@@ -124,14 +148,18 @@ const st = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   name: { flexShrink: 1, fontFamily: F.bold, fontSize: 22, color: C.text },
   demo: { fontFamily: F.bold, fontSize: 11, color: C.text, backgroundColor: C.gold, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 4, overflow: 'hidden' },
-  day: { fontFamily: F.body, fontSize: 15, color: C.muted },
-  progress: { height: 8, backgroundColor: C.line, borderRadius: 4, overflow: 'hidden', marginVertical: 4 },
+  done: { fontFamily: F.bold, fontSize: 17, color: C.xpText },
+  day: { fontFamily: F.body, fontSize: 14, color: C.muted },
+  progress: { height: 8, backgroundColor: C.line, borderRadius: 4, overflow: 'hidden', marginVertical: 3 },
   progressFill: { height: '100%', backgroundColor: C.xp },
-  stats: { flexDirection: 'row', gap: 16 },
-  stat: { fontFamily: F.bold, fontSize: 16, fontVariant: ['tabular-nums'] },
+  stats: { flexDirection: 'row', gap: 14, marginTop: 2 },
+  stat: { fontFamily: F.bold, fontSize: 15, fontVariant: ['tabular-nums'] },
   why: { backgroundColor: C.parch, borderWidth: 2, borderColor: C.parchLine, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, gap: 2 },
   whyLabel: { fontFamily: F.bold, fontSize: 11, letterSpacing: 1.2, color: C.parchMuted },
   whyText: { fontFamily: F.bold, fontSize: 17, lineHeight: 23, color: C.parchHead },
+  welcome: { backgroundColor: '#E3EDFC', borderWidth: 2, borderColor: C.primary, borderRadius: 8, padding: 14, gap: 6 },
+  welcomeTitle: { fontFamily: F.bold, fontSize: 17, color: C.text },
+  welcomeText: { fontFamily: F.body, fontSize: 15, lineHeight: 21, color: C.text },
   tip: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: C.surface, borderWidth: 2, borderColor: C.line, borderRadius: 8, padding: 12 },
   tipLabel: { fontFamily: F.bold, fontSize: 11, letterSpacing: 1.2, color: C.primary },
   new: { fontFamily: F.bold, fontSize: 10, color: C.text, backgroundColor: C.gold, paddingHorizontal: 5, paddingVertical: 1, borderRadius: 3, overflow: 'hidden' },
@@ -139,25 +167,30 @@ const st = StyleSheet.create({
   tipPreview: { fontFamily: F.body, fontSize: 14, lineHeight: 19, color: C.muted },
   chev: { fontFamily: F.bold, fontSize: 26, color: C.muted },
   list: { gap: 8 },
-  listLabel: { fontFamily: F.bold, fontSize: 11, letterSpacing: 1.2, color: C.muted },
+  cue: { fontFamily: F.bold, fontSize: 14, lineHeight: 19, color: C.muted },
   task: { backgroundColor: C.surface, borderWidth: 2, borderColor: C.line, borderRadius: 8, padding: 12, gap: 8 },
   taskRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   taskDone: { borderColor: C.xp, backgroundColor: '#EAF7EF' },
   taskText: { flex: 1, fontFamily: F.body, fontSize: 17, lineHeight: 23, color: C.text },
   struck: { textDecorationLine: 'line-through', color: C.muted },
   check: { width: 28, height: 28, borderRadius: 6, borderWidth: 2, borderColor: C.muted, alignItems: 'center', justifyContent: 'center', backgroundColor: C.surface },
+  checkSmall: { width: 22, height: 22, borderRadius: 5 },
   checkOn: { backgroundColor: C.xp, borderColor: C.xp },
-  checkMark: { fontFamily: F.bold, fontSize: 16, color: '#FFFFFF' },
+  checkKept: { backgroundColor: C.kept, borderColor: C.kept },
+  checkMark: { fontFamily: F.bold, fontSize: 14, color: '#FFFFFF' },
   rateRow: { flexDirection: 'row', gap: 8 },
   rate: { flex: 1, height: 40, borderRadius: 6, borderWidth: 2, borderColor: C.line, backgroundColor: C.surface2, alignItems: 'center', justifyContent: 'center' },
   rateOn: { backgroundColor: C.gold, borderColor: C.gold },
   rateText: { fontFamily: F.bold, fontSize: 16, color: C.muted },
   hint: { fontFamily: F.body, fontSize: 13, color: C.muted },
+  minimum: { flexDirection: 'row', alignItems: 'center', gap: 10, borderWidth: 2, borderStyle: 'dashed', borderColor: C.line, borderRadius: 8, paddingVertical: 10, paddingHorizontal: 12 },
+  minimumOn: { borderStyle: 'solid', borderColor: C.kept, backgroundColor: '#EEF8F2' },
+  minimumText: { flex: 1, fontFamily: F.body, fontSize: 15, lineHeight: 20, color: C.text },
   nav: { flexDirection: 'row', gap: 10 },
   navBtn: { flex: 1, backgroundColor: C.primary, borderRadius: 8, borderBottomWidth: 4, borderBottomColor: '#173f8c', paddingVertical: 10, paddingHorizontal: 12 },
   navLabel: { fontFamily: F.bold, fontSize: 16, color: '#FFFFFF' },
   navSub: { fontFamily: F.body, fontSize: 13, color: '#DCE7FB' },
   tester: { flexDirection: 'row', gap: 16, justifyContent: 'center', alignItems: 'center' },
   testerLabel: { fontFamily: F.body, fontSize: 13, color: C.muted },
-  testerLink: { fontFamily: F.bold, fontSize: 14, color: C.primary },
+  link: { fontFamily: F.bold, fontSize: 14, color: C.primary },
 });

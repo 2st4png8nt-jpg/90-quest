@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { GoalId, WHY_LORE } from '../content';
-import { CharacterChoice, GameState, newGame, WHY_LEVELS } from '../game';
+import { CharacterChoice, Difficulty, DIFFICULTY_LABELS, GameState, newGame, Reminder, WHY_LEVELS } from '../game';
+import { ReminderPicker } from '../ReminderPicker';
 import { HEROES } from '../Sprite';
 import { C, F } from '../theme';
 import { Btn, Card, Heading, LoreScroll } from '../ui';
@@ -14,7 +15,7 @@ const GOALS: { id: GoalId | 'debt' | 'save' | 'study'; name: string; sub: string
   { id: 'study', name: 'Study / Learn', sub: 'Coming soon', live: false, verb: '' },
 ];
 
-type Step = 'hero' | 'goal' | 'why' | 'summary';
+type Step = 'hero' | 'goal' | 'why' | 'summary' | 'reminder';
 type Props = { onDone: (s: GameState) => void; onDemo: () => void; onCancel?: () => void };
 
 export function Onboarding({ onDone, onDemo, onCancel }: Props) {
@@ -25,6 +26,8 @@ export function Onboarding({ onDone, onDemo, onCancel }: Props) {
   const [anchor, setAnchor] = useState('');
   const [habit, setHabit] = useState('');
   const [tiny, setTiny] = useState('');
+  const [difficulty, setDifficulty] = useState<Difficulty>('standard');
+  const [reminder, setReminder] = useState<Reminder>(null);
   const [why, setWhy] = useState<string[]>([]);
   const [draft, setDraft] = useState('');
   const [error, setError] = useState('');
@@ -72,18 +75,39 @@ export function Onboarding({ onDone, onDemo, onCancel }: Props) {
             </Pressable>
           ))}
         </View>
-        {goal === 'habit' && (
+        {goal && (
           <Card>
-            <Heading>Stack it on something you already do</Heading>
-            <Field label="After I…" value={anchor} onChange={setAnchor} placeholder="pour my morning coffee" />
-            <Field label="I will…" value={habit} onChange={setHabit} placeholder="read 10 pages" />
-            <Field label="Tiny version for the first 30 days (optional)" value={tiny} onChange={setTiny} placeholder="read 1 page" />
+            <Heading>{goal === 'habit' ? 'Stack it on something you already do' : 'Hook it to your routine'}</Heading>
+            <Field label="After I… (something you already do every day)" value={anchor} onChange={setAnchor}
+              placeholder={goal === 'habit' ? 'pour my morning coffee' : 'get home from work'} />
+            {goal === 'habit' && (
+              <>
+                <Field label="I will… (the new habit)" value={habit} onChange={setHabit} placeholder="read 10 pages" />
+                <Field label="Tiny version (optional, ~2 minutes)" value={tiny} onChange={setTiny} placeholder="read 1 page" />
+              </>
+            )}
+            <Text style={st.hintText}>Linking the new action to a cue you already have is what turns it into a habit.</Text>
+          </Card>
+        )}
+        {goal && (
+          <Card>
+            <Heading>How hard should it start?</Heading>
+            <View style={st.diffRow}>
+              {(['easy', 'standard', 'hard'] as const).map(d => (
+                <Pressable key={d} accessibilityRole="radio" accessibilityState={{ selected: difficulty === d }} onPress={() => setDifficulty(d)} style={[st.diff, difficulty === d && st.on]}>
+                  <Text style={st.goalName}>{DIFFICULTY_LABELS[d].name}</Text>
+                  <Text style={st.goalSub}>{DIFFICULTY_LABELS[d][goal]}</Text>
+                </Pressable>
+              ))}
+            </View>
+            <Text style={st.hintText}>You can change this at your Day 31 and Day 61 check-ins.</Text>
           </Card>
         )}
         {!!error && <Text style={st.error}>{error}</Text>}
         <Btn title="Next: find your why" onPress={() => {
           if (!goal) return fail('Pick a goal to continue.');
-          if (goal === 'habit' && (!anchor.trim() || !habit.trim())) return fail('Fill in “After I…” and “I will…”.');
+          if (!anchor.trim()) return fail('Fill in “After I…” so the plan has a cue.');
+          if (goal === 'habit' && !habit.trim()) return fail('Fill in “I will…”.');
           setError(''); setStep('why');
         }} />
         <Btn variant="ghost" title="Back" onPress={() => setStep('hero')} />
@@ -122,6 +146,18 @@ export function Onboarding({ onDone, onDemo, onCancel }: Props) {
     );
   }
 
+  if (step === 'reminder') {
+    return (
+      <View style={st.page}>
+        <Text style={st.title}>Want a daily reminder?</Text>
+        <Text style={st.sub}>One notification a day, at the time you usually {anchor ? `${anchor.replace(/^my /, 'your ')}` : 'do your routine'}. It shows your why and today's first task. That's it.</Text>
+        <ReminderPicker value={reminder} onChange={setReminder} />
+        <Btn title="Start Day 1" onPress={() => onDone(newGame({ goal: goal!, hero, character: character!, why, anchor, habit, tiny, difficulty, reminder }))} />
+        <Btn variant="ghost" title="Back" onPress={() => setStep('summary')} />
+      </View>
+    );
+  }
+
   return (
     <View style={st.page}>
       <Text style={st.title}>Your why</Text>
@@ -137,7 +173,7 @@ export function Onboarding({ onDone, onDemo, onCancel }: Props) {
           </View>
         ))}
       </View>
-      <Btn title="Start Day 1" onPress={() => onDone(newGame({ goal: goal!, hero, character: character!, why, anchor, habit, tiny }))} />
+      <Btn title="Next" onPress={() => setStep('reminder')} />
       <Btn variant="ghost" title="Rewrite my answers" onPress={() => { setWhy([]); setDraft(''); setStep('why'); }} />
     </View>
   );
@@ -168,6 +204,9 @@ const st = StyleSheet.create({
   label: { fontFamily: F.body, fontSize: 15, color: C.muted },
   input: { fontFamily: F.body, fontSize: 17, color: C.text, backgroundColor: C.surface, borderWidth: 2, borderColor: C.line, borderRadius: 8, padding: 12 },
   error: { fontFamily: F.bold, fontSize: 15, color: C.streak },
+  hintText: { fontFamily: F.body, fontSize: 14, lineHeight: 20, color: C.muted },
+  diffRow: { flexDirection: 'row', gap: 8 },
+  diff: { flex: 1, backgroundColor: C.surface, borderWidth: 2, borderColor: C.line, borderRadius: 8, padding: 10, gap: 4 },
   levels: { flexDirection: 'row', gap: 6 },
   dot: { flex: 1, height: 8, borderRadius: 4, backgroundColor: C.line },
   dotDone: { backgroundColor: C.xp },

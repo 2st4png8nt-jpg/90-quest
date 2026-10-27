@@ -14,6 +14,7 @@ export const C = {
   muted: '#4F6178',     // 5.6:1 on bg
   primary: '#245BC4',   // buttons; white text 6.2:1
   xp: '#2FB36B',        // bar fill only
+  kept: '#8FD3AB',      // "kept going" (minimum day): lighter green, never labeled partial
   xpText: '#1E7D4A',    // 5.1:1 on white
   gold: '#F5B82E',      // rewards; navy text 8.7:1
   streak: '#C2521A',    // 4.7:1 on white

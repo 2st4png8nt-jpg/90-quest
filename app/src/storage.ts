@@ -8,7 +8,7 @@ export async function loadGame(): Promise<GameState | null> {
   try {
     const raw = await AsyncStorage.getItem(KEY);
     const s = raw ? JSON.parse(raw) : null;
-    return s && s.version === 2 ? s : null; // older test saves are dropped
+    return s && s.version === 3 ? s : null; // older test saves are dropped
   } catch {
     return null;
   }
