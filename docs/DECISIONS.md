@@ -6,7 +6,9 @@
 - v1 goals: Fitness and New Habit. Debt, savings, studying come later.
 - Data: stored on the phone only. No accounts, no bank linking.
 - RPG depth: light — XP, levels, streaks, badges.
-- Art: pixel art. Narrator: "Pip", a playful wisp.
+- Art: pixel art, anime style (shonen-inspired, original characters); male and female hero to choose from. Narrator: "Pip", a playful wisp.
+- Readability: Atkinson Hyperlegible for text; pixel font only for logo and level badge.
+- Colors: light, research-based palette; see docs/DESIGN.md.
 - Monetization: none yet.
 - Autonomy: Claude makes calls and logs them here; asks before anything that costs money or can't be undone.
 - Research rule: every info bite cites an entry in research/sources.json. No fabricated claims.
@@ -20,5 +22,6 @@
 - Phase starts framed as fresh starts (Dai 2014).
 
 ## Open items
-- Testing on phones: Android APK needs a free Expo account (EAS) or a GitHub repo with Actions. Google's Android build servers are blocked from Claude's workspace.
+- Testing on phones: Android APK builds via GitHub Actions (.github/workflows/android-apk.yml) and appears under Releases. iPhone testing needs a free Expo account (Expo Go) later.
+- Days currently advance with a tester button; the real calendar-based day rollover comes next.
 - Name check for "90 Day Quest" in app stores before publishing.
