@@ -1,0 +1,25 @@
+// Run with: npx tsx tests/game.test.ts
+import { advanceDay, achievementsFor, coreWhy, demoGame, markLoreRead, newGame, questsFor, rateToday, toggleQuest } from '../src/game';
+import { bitesFor, SOURCES, TRACKS, WHY_LORE } from '../src/content';
+let fails = 0;
+const ok = (c: boolean, m: string) => { if (!c) { fails++; console.log('FAIL', m); } else console.log('ok', m); };
+const why = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+let s = newGame({ goal: 'habit', hero: 'T', character: 'female', why, anchor: 'brush teeth', habit: 'floss all', tiny: 'floss one' });
+ok(s.achievements.why === 1, 'why achievement on start');
+ok(coreWhy(s) === 'g', 'core why is deepest answer');
+ok(questsFor(s, 1)[0].text.includes('floss one') && questsFor(s, 31)[0].text.includes('floss all'), 'tiny then full habit');
+let r = toggleQuest(s, 'do'); r = rateToday(r.state, 5);
+ok(!!r.state.achievements.auto && !!r.message?.includes('On Autopilot'), 'rating 5 unlocks On Autopilot');
+r = advanceDay(r.state); ok(r.state.streak === 1 && !!r.state.achievements.first, 'clear day -> streak 1 + First Step');
+r = advanceDay(r.state); ok(r.state.shields === 0 && r.state.streak === 1 && !!r.state.achievements.saved, 'miss -> shield, Shielded');
+r = advanceDay(r.state); ok(r.state.streak === 0, 'second miss in a row resets');
+let t = r.state; for (let i = 0; i < 120; i++) t = advanceDay(t).state;
+ok(t.day === 90 && !!t.finished && !!t.achievements.done && !!t.achievements.day66, 'finishes at 90 with milestones');
+ok(markLoreRead(s, 5).state.seenLore.includes(5) && markLoreRead(markLoreRead(s, 5).state, 5).state.seenLore.length === 1, 'lore read once');
+const d = demoGame();
+ok(d.day === 12 && d.log[6] === 'missed-shield' && d.streak === 10 && d.bestStreak === 10, `demo state (streak ${d.streak})`);
+ok(achievementsFor('fitness').every(a => a.goal !== 'habit'), 'habit-only achievements hidden for fitness');
+for (const g of ['fitness', 'habit'] as const) for (const b of [TRACKS[g].intro, ...bitesFor(g)]) if (!SOURCES[b.source]) ok(false, `${g} day ${b.day} missing source`);
+for (const b of WHY_LORE) if (!SOURCES[b.source]) ok(false, `why lore missing source`);
+ok(!JSON.stringify([TRACKS, bitesFor('fitness'), bitesFor('habit')]).match(/\bXP\b|head start/i), 'no XP language left in lessons');
+console.log(fails ? `${fails} FAILED` : 'ALL PASSED'); process.exitCode = fails ? 1 : 0;

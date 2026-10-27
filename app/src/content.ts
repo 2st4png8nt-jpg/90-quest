@@ -6,7 +6,8 @@ export type GoalId = 'fitness' | 'habit';
 
 export type SourceId =
   | 'lally' | 'goll' | 'harkin' | 'wood' | 'dai' | 'kivetz'
-  | 'who' | 'paluch' | 'burke' | 'morton' | 'watson';
+  | 'who' | 'paluch' | 'burke' | 'morton' | 'watson'
+  | 'sheldon' | 'koestner' | 'teixeira';
 
 export const SOURCES: Record<SourceId, { cite: string; url: string }> = {
   lally: { cite: 'Lally, van Jaarsveld, Potts & Wardle (2010). European Journal of Social Psychology, 40, 998–1009.', url: 'https://doi.org/10.1002/ejsp.674' },
@@ -19,6 +20,9 @@ export const SOURCES: Record<SourceId, { cite: string; url: string }> = {
   paluch: { cite: 'Paluch et al. (2022). Lancet Public Health, 7, e219–28.', url: 'https://discovery.ucl.ac.uk/id/eprint/10170017/1/1-s2.0-S2468266721003029-main.pdf' },
   burke: { cite: 'Burke, Wang & Sevick (2011). Journal of the American Dietetic Association, 111(1), 92–102.', url: 'https://pubmed.ncbi.nlm.nih.gov/21185970/' },
   morton: { cite: 'Morton et al. (2018). British Journal of Sports Medicine, 52(6), 376–384.', url: 'https://bjsm.bmj.com/content/52/6/376' },
+  sheldon: { cite: 'Sheldon & Elliot (1999). Journal of Personality and Social Psychology, 76(3), 482–497.', url: 'https://doi.org/10.1037/0022-3514.76.3.482' },
+  koestner: { cite: 'Koestner (2008). Canadian Psychology, 49(1), 60–67.', url: 'https://selfdeterminationtheory.org/wp-content/uploads/2014/04/2008_Koestner_CanPsyc.pdf.pdf' },
+  teixeira: { cite: 'Teixeira, Carraça, Markland, Silva & Ryan (2012). International Journal of Behavioral Nutrition and Physical Activity, 9, 78.', url: 'https://doi.org/10.1186/1479-5868-9-78' },
   watson: { cite: 'Watson et al. (2015). Journal of Clinical Sleep Medicine, 11(6), 591–592.', url: 'https://doi.org/10.5664/jcsm.4758' },
 };
 
@@ -37,12 +41,12 @@ const SHARED: Bite[] = [
   { day: 7, title: 'Missed a day? You\'re fine', source: 'lally', body: [
     'In the UCL habit study, missing one chance to do the behavior didn\'t meaningfully set back habit building.',
     'That\'s why you get one Streak Shield per week. It\'s the long gaps that hurt.'] },
-  { day: 10, title: 'About that head start', source: 'kivetz', body: [
-    'Your XP bar didn\'t start at zero. That\'s on purpose.',
-    'In a coffee-card experiment, people with a 12-stamp card and 2 free stamps finished faster than people with a plain 10-stamp card, even though both needed 10 purchases. Visible progress pulls you forward.'] },
-  { day: 14, title: 'Why rewards matter', source: 'wood', body: [
+  { day: 10, title: 'The closer you get, the faster you go', source: 'kivetz', body: [
+    'In a coffee-card study, people bought coffee more often as they got closer to their free drink. By the last stamp, they were coming back about 20% sooner.',
+    'Progress you can see pulls you forward. Watch your next milestone on the map get closer.'] },
+  { day: 14, title: 'Why checking off feels good', source: 'wood', body: [
     'Habits form when a rewarded action is repeated in the same context. The reward helps lock in the link between cue and action.',
-    'Small, quick wins count. That\'s what the XP is for.'] },
+    'That small hit of satisfaction when you check off today counts. Let yourself enjoy it.'] },
   { day: 31, title: 'Phase 2: a fresh start', source: 'dai', body: [
     'New chapters make people act on goals. In one study, the odds of a gym visit rose about 33% at the start of a week and 47% at the start of a semester.',
     'Phase 2 is your new chapter. Use it.'] },
@@ -100,6 +104,19 @@ export const TRACKS: Record<GoalId, { name: string; intro: Bite; bites: Bite[] }
     bites: [],
   },
 };
+
+/** Shown during "Find your why". */
+export const WHY_LORE: Bite[] = [
+  { day: 0, title: 'Why your why matters', source: 'sheldon', body: [
+    'Researchers found that people whose goals connect to their own deeper values put in more sustained effort, and that effort made them more likely to reach the goal.',
+    'Motivation fades. A real reason sticks around. Answer honestly; nobody sees this but you.'] },
+  { day: 0, title: 'Your reasons beat pressure', source: 'koestner', body: [
+    'Across 12 studies, people who pursued goals for their own reasons made more progress than people who felt pushed by guilt or others.',
+    'The effect was modest but held up even after accounting for how hard or important the goal was.'] },
+  { day: 0, title: 'It works for exercise too', source: 'teixeira', body: [
+    'A review of 66 exercise studies found that people who exercised because they valued it, or enjoyed it, generally exercised more.',
+    'Exercising out of guilt or pressure showed no link, or a negative one.'] },
+];
 
 /** Day-by-day lore for a goal, excluding the Day 1 intro. */
 export function bitesFor(goal: GoalId): Bite[] {

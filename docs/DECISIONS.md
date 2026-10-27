@@ -5,7 +5,9 @@
 - Stack: Expo (React Native), iOS + Android. Not publishing yet; test builds only.
 - v1 goals: Fitness and New Habit. Debt, savings, studying come later.
 - Data: stored on the phone only. No accounts, no bank linking.
-- RPG depth: light — XP, levels, streaks, badges.
+- No RPG layer (changed 2026-10-27): no XP or levels. Characters stay; achievements mark milestones. Streak + weekly Streak Shield stay.
+- Onboarding: pick hero → pick goal → "find your why" (7 levels deep, Dean Graziosi's format; research basis is self-concordance: Sheldon & Elliot 1999, Koestner 2008, Teixeira et al. 2012) → Day 1.
+- Home fits on one screen: hero + status, my why, today's tip, today's list. Journey (map + lessons) and achievements open as sheets.
 - Art: pixel art, anime style (shonen-inspired, original characters); male and female hero to choose from. Narrator: "Pip", a playful wisp.
 - Readability: Atkinson Hyperlegible for text; pixel font only for logo and level badge.
 - Colors: light, research-based palette; see docs/DESIGN.md.
