@@ -1,97 +1,94 @@
 <title>90 Day Quest</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pixelify+Sans:wght@400;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Press+Start+2P&display=swap">
 <style>
-/* Layout: a single-column handheld "game screen" — status card, today's quests, lore scroll, 90-day map, codex. Deliberately single-theme (night dungeon). */
+/* Layout: single-column handheld quest log — hero card, today's quests, lore scroll, 90-day map, codex.
+   Light, research-based palette (see docs/DESIGN.md); deliberately single-theme for readability. */
 :root{
-  --night:#13142a; --panel:#1e2044; --panel2:#2a2d5c; --line:#3c4080;
-  --gold:#f2c14e; --xp:#6fd36a; --ember:#ff7a45; --ice:#7fc8ff;
-  --text:#ecebff; --muted:#a3a3cf;
-  --parch:#ecdcb2; --ink:#2b1d10; --parch-line:#b89a5f;
-  --display:"Press Start 2P", ui-monospace, monospace;
-  --body:"Pixelify Sans", ui-rounded, system-ui, sans-serif;
-  color-scheme:dark;
+  --bg:#EAF3F8; --panel:#FFFFFF; --panel2:#F3F7FB; --line:#C9D8E6;
+  --text:#16243A; --muted:#4F6178; --primary:#245BC4; --primary-edge:#173f8c;
+  --xp:#2FB36B; --xp-text:#1E7D4A; --gold:#F5B82E; --streak:#C2521A; --shield:#127A75; --missed:#D5DEE8;
+  --parch:#FFF6DF; --ink:#3A2A12; --parch-head:#8A4B12; --parch-muted:#6A5532; --parch-line:#E3CF9F;
+  --logo:"Press Start 2P", ui-monospace, monospace;
+  --body:"Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
-html,body{background:var(--night);color:var(--text)}
-body{font-family:var(--body);font-size:17px;line-height:1.45;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px;
-  background-image:radial-gradient(var(--line) 1px,transparent 1px);background-size:24px 24px}
-.wrap{max-width:460px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-h1,h2,h3,.label{font-family:var(--display);font-weight:400;letter-spacing:.04em;text-wrap:balance}
-h1{font-size:18px;margin:0;color:var(--gold)}
-h2{font-size:11px;margin:0;color:var(--muted);text-transform:uppercase}
+html,body{background:var(--bg);color:var(--text)}
+body{font-family:var(--body);font-size:17px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 48px}
+.wrap{max-width:480px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+h1{font-family:var(--logo);font-weight:400;font-size:15px;margin:0;color:var(--primary);letter-spacing:.02em}
+h2{font-family:var(--body);font-weight:700;font-size:13px;margin:0;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .px{image-rendering:pixelated;display:block}
-.box{background:var(--panel);border:3px solid var(--line);box-shadow:4px 4px 0 #0008;padding:14px}
+.box{background:var(--panel);border:2px solid var(--line);border-radius:6px;padding:16px}
 .top{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.demo{font-family:var(--display);font-size:8px;color:var(--night);background:var(--ice);padding:5px 6px}
+.demo{font-weight:700;font-size:12px;color:var(--text);background:var(--gold);padding:4px 8px;border-radius:4px}
 button{font:inherit;cursor:pointer;color:inherit}
-button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
-.btn{font-family:var(--display);font-size:10px;background:var(--gold);color:var(--night);border:0;padding:12px 14px;box-shadow:0 4px 0 #8a6a1c;letter-spacing:.04em}
-.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a6a1c}
-.btn.ghost{background:var(--panel2);color:var(--text);box-shadow:0 4px 0 #0009}
-/* hero card */
-.hero{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:center}
-.hero .name{font-family:var(--display);font-size:12px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
+.btn{font-weight:700;font-size:16px;background:var(--primary);color:#fff;border:0;border-bottom:4px solid var(--primary-edge);border-radius:6px;padding:12px 16px}
+.btn:active{transform:translateY(2px)}
+.btn.ghost{background:var(--panel);color:var(--primary);border:2px solid var(--primary);border-bottom-width:4px}
+.hero{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.hero .name{font-weight:700;font-size:20px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lv{font-family:var(--logo);font-size:10px;background:var(--gold);padding:5px 6px;border-radius:4px}
 .hero .sub{color:var(--muted);font-size:15px}
-.bar{height:16px;background:var(--night);border:2px solid var(--line);position:relative;margin-top:6px}
-.bar i{position:absolute;inset:0 auto 0 0;background:var(--xp);transition:width .4s steps(8)}
-.bar span{position:absolute;right:4px;top:-1px;font-size:12px;font-variant-numeric:tabular-nums}
-.stats{display:flex;gap:16px;margin-top:8px;font-size:15px;flex-wrap:wrap}
-.stats b{font-family:var(--display);font-size:10px;font-weight:400}
-.ember{color:var(--ember)} .ice{color:var(--ice)}
-/* quests */
+.bar{height:14px;background:var(--panel2);border:2px solid var(--line);border-radius:7px;overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--xp);transition:width .4s}
+.xpt{font-weight:700;font-size:14px;color:var(--xp-text);font-variant-numeric:tabular-nums}
+.stats{display:flex;gap:14px;margin-top:4px;font-size:14px;font-weight:700;flex-wrap:wrap}
+.ember{color:var(--streak)} .ice{color:var(--shield)}
 .quests{display:flex;flex-direction:column;gap:8px;margin-top:10px}
-.q{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:var(--panel2);border:2px solid var(--line);padding:10px;text-align:left;width:100%}
-.q .chk{width:24px;height:24px;border:3px solid var(--muted);display:grid;place-items:center;font-family:var(--display);font-size:10px}
-.q.done{opacity:.7}.q.done .chk{background:var(--xp);border-color:var(--xp);color:var(--night)}
-.q.done .t{text-decoration:line-through}
-.q .xp{font-family:var(--display);font-size:9px;color:var(--gold)}
-.rate{display:flex;gap:6px;margin-top:6px}
-.rate button{width:34px;height:30px;background:var(--night);border:2px solid var(--line);font-family:var(--display);font-size:10px}
-.rate button.on{background:var(--gold);color:var(--night);border-color:var(--gold)}
-/* lore scroll */
-.scroll{background:var(--parch);color:var(--ink);border:3px solid var(--parch-line);box-shadow:4px 4px 0 #0008;padding:16px;position:relative}
-.scroll h3{font-size:11px;margin:0 0 10px;color:#6b3d12;line-height:1.6}
-.scroll p{margin:0 0 10px;max-width:62ch}
-.scroll .src{font-size:13px;color:#5d4a2e;border-top:2px dashed var(--parch-line);padding-top:8px}
-.scroll .src a{color:#6b3d12}
-.pip{display:flex;gap:10px;align-items:flex-start}
-.new{font-family:var(--display);font-size:8px;background:var(--ember);color:#fff;padding:4px 5px;position:absolute;top:-10px;right:10px}
-/* map */
-.map{display:grid;grid-template-columns:repeat(15,1fr);gap:3px;margin-top:10px}
-.map i{aspect-ratio:1;background:var(--night);border:1px solid var(--line)}
+.q{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:center;background:var(--panel2);border:2px solid var(--line);border-radius:6px;padding:12px;text-align:left;width:100%;color:var(--text)}
+.q .chk{width:28px;height:28px;border:2px solid var(--muted);border-radius:4px;background:var(--panel);display:grid;place-items:center;font-weight:700;color:#fff}
+.q.done{border-color:var(--xp);background:#EAF7EF}.q.done .chk{background:var(--xp);border-color:var(--xp)}
+.q.done .t{text-decoration:line-through;color:var(--muted)}
+.q .xp{font-weight:700;font-size:14px;color:var(--xp-text)}
+.rate{display:flex;gap:8px;margin-top:8px}
+.rate button{width:40px;height:40px;background:var(--panel);border:2px solid var(--line);border-radius:6px;font-weight:700;color:var(--muted)}
+.rate button.on{background:var(--gold);color:var(--text);border-color:var(--gold)}
+.hint{font-size:13px;color:var(--muted);margin-top:6px}
+.scroll{background:var(--parch);color:var(--ink);border:2px solid var(--parch-line);border-radius:6px;padding:16px;position:relative}
+.scroll h3{font-size:19px;line-height:1.3;margin:0;color:var(--parch-head);text-wrap:balance}
+.scroll p{margin:10px 0 0;max-width:62ch;line-height:1.55}
+.scroll .src{font-size:13px;color:var(--parch-muted);border-top:1px solid var(--parch-line);padding-top:10px;margin-top:12px}
+.scroll .src a{color:var(--parch-head);font-weight:700}
+.pip{display:flex;gap:12px;align-items:center}
+.new{font-weight:700;font-size:12px;background:var(--gold);color:var(--text);padding:3px 8px;border-radius:4px;position:absolute;top:-11px;right:12px}
+.map{display:grid;grid-template-columns:repeat(15,1fr);gap:4px;margin-top:10px}
+.map i{aspect-ratio:1;background:var(--panel2);border:1px solid var(--line);border-radius:2px}
 .map i.d{background:var(--xp);border-color:var(--xp)}
-.map i.m{background:var(--panel2)}
-.map i.s{background:var(--ice);border-color:var(--ice)}
-.map i.now{outline:2px solid var(--gold);outline-offset:1px}
-.map i.ms{border-color:var(--gold)}
-.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
-.legend span::before{content:"";display:inline-block;width:10px;height:10px;margin-right:5px;background:var(--c);vertical-align:-1px}
-.phases{display:flex;justify-content:space-between;font-family:var(--display);font-size:8px;color:var(--muted);margin-top:8px;gap:6px}
-/* codex */
-details{border-top:2px solid var(--line);padding:8px 0}
+.map i.m{background:var(--missed)}
+.map i.s{background:var(--shield);border-color:var(--shield)}
+.map i.ms{border:2px solid var(--gold)}
+.map i.now{border:2px solid var(--primary)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:14px;color:var(--muted);margin-top:8px}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:2px;margin-right:6px;background:var(--c);vertical-align:-1px}
+.phases{display:flex;justify-content:space-between;font-weight:700;font-size:13px;color:var(--muted);margin-top:8px;gap:6px}
+details{border-top:1px solid var(--line);padding:10px 0}
 details:first-of-type{border-top:0}
-summary{cursor:pointer;font-size:16px}
-summary small{color:var(--muted);font-family:var(--display);font-size:8px;margin-right:6px}
-details p{margin:8px 0;color:var(--text);max-width:62ch}
+summary{cursor:pointer;font-weight:700;font-size:16px}
+summary small{color:var(--primary);font-size:12px;margin-right:8px}
+details p{margin:8px 0;max-width:62ch}
 details .cite{font-size:13px;color:var(--muted)}
-details a{color:var(--ice)}
-/* setup */
+details a{color:var(--primary);font-weight:700}
 .goals{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
-.goal{background:var(--panel2);border:3px solid var(--line);padding:12px;text-align:left;display:flex;flex-direction:column;gap:6px;min-height:96px}
-.goal.on{border-color:var(--gold)}
-.goal b{font-family:var(--display);font-size:10px;font-weight:400;line-height:1.5}
+.goal{background:var(--panel2);border:2px solid var(--line);border-radius:6px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:4px;color:var(--text)}
+.goal.on{border-color:var(--primary);background:#E3EDFC}
+.goal b{font-size:16px}
 .goal small{color:var(--muted);font-size:14px}
-.goal[disabled]{opacity:.45;cursor:not-allowed}
-label{display:block;font-size:15px;color:var(--muted);margin:12px 0 4px}
-input[type=text]{width:100%;font:inherit;background:var(--night);color:var(--text);border:2px solid var(--line);padding:10px}
+.goal[disabled]{opacity:.5;cursor:not-allowed}
+.chars{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:10px}
+.chars button{background:var(--panel2);border:2px solid var(--line);border-radius:6px;padding:12px;display:grid;place-items:center}
+.chars button.on{border-color:var(--primary);background:#E3EDFC}
+label{display:block;font-size:15px;color:var(--muted);margin:12px 0 6px}
+input[type=text]{width:100%;font:inherit;background:var(--panel2);color:var(--text);border:2px solid var(--line);border-radius:6px;padding:12px}
 .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-.tester{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--gold);color:var(--night);font-family:var(--display);font-size:10px;padding:12px 14px;box-shadow:4px 4px 0 #0008;max-width:calc(100% - 32px);text-align:center;line-height:1.6}
+.tester{font-size:14px;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:#fff;font-weight:700;font-size:15px;padding:12px 16px;border-radius:8px;max-width:calc(100% - 32px);text-align:center}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-.bob{animation:bob 1.6s steps(2) infinite}
+.bob{animation:bob 1.2s steps(2) infinite}
 </style>
 
 <div class="wrap" id="app"></div>
@@ -167,7 +164,7 @@ const KEY="levelup.v1";
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.goal)return s}catch(e){}return null}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function demo(){
- const s={goal:"fitness",hero:"Wanderer",anchor:"",habit:"",tiny:"",day:12,xp:25,streak:0,shields:1,log:{},rates:{},seen:[],demo:true,screen:"home"};
+ const s={goal:"fitness",character:"male",hero:"Wanderer",anchor:"",habit:"",tiny:"",day:12,xp:25,streak:0,shields:1,log:{},rates:{},seen:[],demo:true,screen:"home"};
  for(let d=1;d<12;d++){
   if(d===6){s.log[d]="missed-shield";continue}
   const qs=questsFor(s,d);s.log[d]=qs.map(q=>q.id);
@@ -177,7 +174,7 @@ function demo(){
  return s;
 }
 let S=load()||demo();
-let draft={goal:"habit",hero:"",anchor:"",habit:"",tiny:""};
+let draft={goal:"habit",hero:"",anchor:"",habit:"",tiny:"",character:"male"};
 
 function lvl(xp){let L=1,need=100;while(xp>=need){xp-=need;L++;need=100+(L-1)*50}return{L,cur:xp,need}}
 
@@ -187,8 +184,7 @@ function sprite(rows,pal,px){
  rows.forEach((row,y)=>[...row].forEach((c,x)=>{if(pal[c])r+=`<rect x="${x}" y="${y}" width="1.02" height="1.02" fill="${pal[c]}"/>`}));
  return `<svg class="px" width="${w*px}" height="${h*px}" viewBox="0 0 ${w} ${h}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
 }
-const HERO=["....hhhh....","...hhhhhh...","...hsssss...","...sesses...","....ssss....","..bbbbbbbb..",".sbbbbbbbbs.",".s.bbbbbb.s.","...bbggbb...","...pp..pp...","...pp..pp...","..kkk..kkk.."];
-const HERO_PAL={h:"#5a3a22",s:"#f1c27d",e:"#1b1b2f",b:"#3f7fd6",g:"#f2c14e",p:"#2c2f5a",k:"#6b4226"};
+const CHARS={male:{rows:["......c...c..c..........", "......cn.cnocn..c.......", "......onnnnnnnnoc.......", ".....onNNnnnnnnnno......", "....onNNnnnnnnnnnno.....", "...connnnnnnnnnnnnoc....", "....onnnnnnnnnnnnnno....", "...cnnsnnnnnnnnsnnno....", "....onssnnssnnssnno.....", ".....onssssssssssnno....", "....onsoeesssseeosno....", "....onseiissssiiesno....", "......ossssssssssso.....", "......osssssSssssso.....", ".......ossssmmssso......", "........oSsssssSo.......", "......owwoSSSSowwo......", ".....okwwwkSSkwwwko.....", "...okkkwwwwwwwwkkkko....", "...okKkkwwWWwwkkKkko....", "...okKkkkwwwwkkkKkko....", "...osKkkkwwwwkkkKkso....", "...osgggggggggggggso....", "...oskkkkwwwwkkkkkso....", "....okkkkwwwwkkkkko.....", "....okKkkwwwwkkKkkko....", "...okKkkkwwwwkkkKkkko...", "...okkkkkpppppkkkkkko...", "....okkkpppopppkkko.....", "......oppppoppppo.......", "......obbbo.obbbo.......", ".....obbbbo.obbbbo......"],pal:{"o": "#12101c", "n": "#22264a", "N": "#3b4a8a", "c": "#2ec4c4", "s": "#f3d2b6", "S": "#d9a98a", "e": "#12101c", "i": "#2ec4c4", "m": "#c0756a", "w": "#f4f6fb", "W": "#c7cde0", "k": "#1d1d2b", "K": "#3a3a56", "g": "#2ec4c4", "p": "#2a2a3d", "b": "#3a2c3c"}},female:{rows:["..............vv........", ".............vVvv.......", "..........oooovvvo......", "........onnNNnnnnvo.....", "......onnNNnnnnnnnvo....", "....onnnnnnnnnnnnnvo....", "....onnnnnnnnnnnnnnvo...", "..onnsnnnnnnnnsnnnnvo...", "..onnssnnssnnssnnnnvo...", "..onnssssssssssnnnnvo...", "..onnsoeesssseeosnnvo...", "..onnseyyssssyyesnnvo...", "..onnssssssssssssnnvo...", "...onnsssssSsssssnnvo...", "...onnnosssmmssonnnvo...", "...onnno.oSSSSo.onnvo...", "...onnowwwoSSowwwonvo...", "....onwwwwwSSwwwwwno....", "....owwgwwwwwwwwwgwwo...", "..owwwgwwWwwwWwwgwwwo...", "..owWwgwwwwwwwwwgwWwo...", "..oswwgwwwwwwwwwgwwso...", "..osvvvvvvvvvvvvvvvso...", "..oswwgwwwwwwwwwgwwso...", "....owwgwwwwwwwwwgwwo...", "....owWgwwwwwwwwwgWwo...", "..owwwgwwwddwwwwgwwwo...", "..owwwgwwdddddwwgwwwo...", "....oooooddoddoooooo....", ".......oddo.oddo........", ".......obbo.obbo........", "......obbbo.obbbo......."],pal:{"o": "#12101c", "n": "#4a2b6b", "N": "#7b4fa8", "c": "#2ec4c4", "s": "#f3d2b6", "S": "#d9a98a", "e": "#12101c", "i": "#2ec4c4", "m": "#c0756a", "w": "#f4f6fb", "W": "#c7cde0", "k": "#1d1d2b", "K": "#3a3a56", "g": "#d9a83a", "p": "#2a2a3d", "b": "#3a2c3c", "v": "#a77be0", "V": "#d9c2ff", "y": "#e0a526", "d": "#2a2a3d"}}};
 const PIP=["...yy...","..yYYy..",".yYwwYy.",".YwkwkY.",".YwwwwY.","..YYYY..","...YY...","....Y..."];
 const PIP_PAL={y:"#c99a2e",Y:"#ffe08a",w:"#fff6d6",k:"#1b1b2f"};
 
@@ -223,26 +219,26 @@ function homeView(){
  return `
  <div class="top"><h1>90 DAY QUEST</h1>${S.demo?'<span class="demo">DEMO RUN</span>':""}</div>
  <section class="box hero">
-  <div class="bob">${sprite(HERO,HERO_PAL,6)}</div>
+  <div class="bob">${sprite(CHARS[S.character||"male"].rows,CHARS[S.character||"male"].pal,4)}</div>
   <div>
-   <div class="name">${esc(S.hero)} · LV ${L}</div>
+   <div class="name">${esc(S.hero)} <span class="lv">LV ${L}</span></div>
    <div class="sub">${goalName} · Day ${S.day}/90 · ${ph}</div>
-   <div class="bar" role="img" aria-label="XP ${cur} of ${need}"><i style="width:${Math.round(cur/need*100)}%"></i><span>${cur}/${need} XP</span></div>
-   <div class="stats"><span class="ember"><b>🔥 ${S.streak}</b> day streak</span><span class="ice"><b>◆ ${S.shields}</b> shield</span></div>
+   <div class="bar" role="img" aria-label="XP ${cur} of ${need}"><i style="width:${Math.round(cur/need*100)}%"></i></div><div class="xpt">${cur} / ${need} XP</div>
+   <div class="stats"><span class="ember">🔥 ${S.streak}-day streak</span><span class="ice">🛡 ${S.shields} shield</span></div>
   </div>
  </section>
  <section class="box">
   <h2>Today's quests</h2>
   <div class="quests">${qs.map(q=>{const on=done.includes(q.id);
-   if(q.rate){const v=S.rates[S.day];return `<div class="q ${on?"done":""}"><span class="chk">${on?"✓":""}</span><div><div class="t">${esc(q.t)}</div><div class="rate">${[1,2,3,4,5].map(n=>`<button aria-label="Rate ${n}" class="${v===n?"on":""}" onclick="rate(${n})">${n}</button>`).join("")}</div></div><span class="xp">+${q.xp}</span></div>`}
+   if(q.rate){const v=S.rates[S.day];return `<div class="q ${on?"done":""}"><span class="chk">${on?"✓":""}</span><div><div class="t">${esc(q.t)}</div><div class="rate">${[1,2,3,4,5].map(n=>`<button aria-label="Rate ${n}" class="${v===n?"on":""}" onclick="rate(${n})">${n}</button>`).join("")}</div><div class="hint">1 = took real effort · 5 = did it without thinking</div></div><span class="xp">+${q.xp}</span></div>`}
    return `<button class="q ${on?"done":""}" onclick="tick('${q.id}')" aria-pressed="${on}"><span class="chk">${on?"✓":""}</span><span class="t">${esc(q.t)}</span><span class="xp">+${q.xp}</span></button>`}).join("")}</div>
  </section>
  ${today?`<section><h2 style="margin-bottom:8px">Pip's lore scroll · Day ${today.d}</h2>${scrollHTML(today,isNew)}</section>`:""}
  <section class="box">
   <h2>90-day map</h2>
   <div class="map">${cells}</div>
-  <div class="phases"><span>1–30 SPAWN</span><span>31–60 GRIND</span><span>61–90 BOSS</span></div>
-  <div class="legend"><span style="--c:var(--xp)">Cleared</span><span style="--c:var(--ice)">Shield used</span><span style="--c:var(--panel2)">Missed</span><span style="--c:var(--gold)">Milestone</span></div>
+  <div class="phases"><span>1–30 Spawn</span><span>31–60 Grind</span><span>61–90 Boss</span></div>
+  <div class="legend"><span style="--c:var(--xp)">Cleared</span><span style="--c:var(--ice)">Shield used</span><span style="--c:var(--missed)">Missed</span><span style="--c:var(--gold)">Milestone</span></div>
  </section>
  <section class="box">
   <h2>Codex · ${unlocked.length} of ${all.length+1} unlocked</h2>
@@ -267,7 +263,7 @@ function setupView(){
  <section class="box">
   <h2>Choose your quest</h2>
   <div class="goals">${goals.map(([id,n,s])=>`<button class="goal ${g===id?"on":""}" ${["fitness","habit"].includes(id)?`onclick="pick('${id}')"`:"disabled"}><b>${n}</b><small>${s}</small></button>`).join("")}</div>
-  <label for="hero">Hero name</label><input id="hero" type="text" maxlength="16" value="${esc(draft.hero)}" placeholder="e.g. Jon" oninput="draft.hero=this.value">
+  </section><section class="box"><h2>Your hero</h2><div class="chars">${["male","female"].map(c=>`<button class="${draft.character===c?"on":""}" aria-label="${c==="male"?"Male":"Female"} hero" aria-pressed="${draft.character===c}" onclick="draft.character='${c}';render()">${sprite(CHARS[c].rows,CHARS[c].pal,4)}</button>`).join("")}</div><label for="hero">Hero name</label><input id="hero" type="text" maxlength="16" value="${esc(draft.hero)}" placeholder="e.g. Jon" oninput="draft.hero=this.value">
   ${g==="habit"?`
   <label for="anchor">After I…  (something you already do daily)</label><input id="anchor" type="text" maxlength="60" value="${esc(draft.anchor)}" placeholder="pour my morning coffee" oninput="draft.anchor=this.value">
   <label for="habit">I will…  (the new habit)</label><input id="habit" type="text" maxlength="60" value="${esc(draft.habit)}" placeholder="read 10 pages" oninput="draft.habit=this.value">
@@ -312,12 +308,12 @@ function nextDay(){
  const nb=all.find(b=>b.d===S.day);if(nb)setTimeout(()=>toast("New lore unlocked!"),S.streak?0:2700);
  save();render();window.scrollTo({top:0,behavior:"smooth"});
 }
-function startSetup(){draft={goal:"habit",hero:"",anchor:"",habit:"",tiny:""};S.screen="setup";render()}
+function startSetup(){draft={goal:"habit",hero:"",anchor:"",habit:"",tiny:"",character:"male"};S.screen="setup";render()}
 function pick(g){draft.goal=g;render()}
 function begin(){
  if(!draft.hero.trim())return toast("Name your hero first");
  if(draft.goal==="habit"&&(!draft.anchor.trim()||!draft.habit.trim()))return toast("Fill in “After I…” and “I will…”");
- S={goal:draft.goal,hero:draft.hero.trim(),anchor:draft.anchor.trim(),habit:draft.habit.trim(),tiny:draft.tiny.trim(),day:1,xp:25,streak:0,shields:1,log:{},rates:{},seen:[],screen:"intro"};
+ S={goal:draft.goal,character:draft.character,hero:draft.hero.trim(),anchor:draft.anchor.trim(),habit:draft.habit.trim(),tiny:draft.tiny.trim(),day:1,xp:25,streak:0,shields:1,log:{},rates:{},seen:[],screen:"intro"};
  save();render();window.scrollTo(0,0);
 }
 render();
