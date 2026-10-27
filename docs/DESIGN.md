@@ -11,6 +11,6 @@
 - **Press Start 2P** (pixel font) only for the logo and level badge.
 
 ## Characters
-- Two original anime-style heroes, 24×32 pixels: male (spiky navy hair, teal tips, black battle coat) and female (violet hair, high ponytail, white long coat with gold trim).
-- Style is inspired by shonen anime; no existing character is copied.
-- Pip, the narrator, is a small glowing wisp.
+- Male and female heroes come from Jon's ChatGPT character sheet (`art/hero-sheet-chatgpt.png`): spiky navy hair with teal glow and a black coat; violet ponytail with a white-and-gold coat.
+- `art/pixelize.py` cuts each full-body figure from the sheet, removes the background, shrinks it to a 50×120 pixel grid with a 32-color palette, and saves it at 4× with hard edges (`app/assets/heroes/`).
+- Pip, the narrator, is a small glowing wisp drawn in code.

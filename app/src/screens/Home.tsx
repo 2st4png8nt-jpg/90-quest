@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { bitesFor, SOURCES, TRACKS } from '../content';
 import { completedToday, currentLore, GameState, level, phase, PHASE_NAMES, questsFor, TOTAL_DAYS } from '../game';
-import { CHARACTERS, Sprite } from '../Sprite';
+import { HEROES } from '../Sprite';
 import { C, F } from '../theme';
 import { Bob, Btn, Card, Heading, LoreScroll } from '../ui';
 
@@ -21,7 +21,7 @@ export function Home({ s, onToggle, onRate, onNextDay, onNewQuest }: Props) {
   const lore = currentLore(s);
   const all = bitesFor(s.goal);
   const unlocked = [TRACKS[s.goal].intro, ...all.filter(b => b.day <= s.day)];
-  const ch = CHARACTERS[s.character];
+  const ch = HEROES[s.character];
 
   return (
     <View style={{ gap: 14 }}>
@@ -31,7 +31,7 @@ export function Home({ s, onToggle, onRate, onNextDay, onNewQuest }: Props) {
       </View>
 
       <Card style={st.hero}>
-        <Bob><Sprite rows={ch.rows} palette={ch.palette} px={4} /></Bob>
+        <Bob><Image source={ch.image} accessibilityIgnoresInvertColors style={{ height: 150, width: 150 * ch.ratio }} /></Bob>
         <View style={{ flex: 1, gap: 6 }}>
           <View style={st.nameRow}>
             <Text style={st.name} numberOfLines={1}>{s.hero}</Text>

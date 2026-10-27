@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { GoalId } from '../content';
 import { CharacterChoice, GameState, newGame } from '../game';
-import { CHARACTERS, Sprite } from '../Sprite';
+import { HEROES } from '../Sprite';
 import { C, F } from '../theme';
 import { Btn, Card, Heading } from '../ui';
 
@@ -54,7 +54,7 @@ export function Setup({ onStart, onDemo, onCancel }: Props) {
           {(['male', 'female'] as const).map(c => (
             <Pressable key={c} accessibilityRole="radio" accessibilityLabel={c === 'male' ? 'Male hero' : 'Female hero'} accessibilityState={{ selected: character === c }}
               onPress={() => setCharacter(c)} style={[st.char, character === c && st.goalOn]}>
-              <Sprite rows={CHARACTERS[c].rows} palette={CHARACTERS[c].palette} px={4} />
+              <Image source={HEROES[c].image} style={{ height: 150, width: 150 * HEROES[c].ratio }} />
             </Pressable>
           ))}
         </View>
